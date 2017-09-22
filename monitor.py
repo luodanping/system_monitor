@@ -25,8 +25,8 @@ mStatus.orbInitStatus = False
 mStatus.power = 0
 mStatus.orbScaleStatus = False
 powerFlagFilePath = "/home/xiaoqiang/Status/power"
-powerLow = 10.0
-
+powerLow = 10.3
+powerlow_nums=0
 mStatusLock = threading.Lock()
 
 def getBrightness(brightness):
@@ -43,13 +43,18 @@ def getImage(image):
     mStatusLock.release()
 
 def getPower(power):
+    global powerlow_nums
     mStatusLock.acquire()
     mStatus.power = power.data
-    #if power.data < powerLow and power.data > 8.0: #and not os.path.isfile(powerFlagFilePath) 
-        #flagFile = open(powerFlagFilePath, "w+")
-        #flagFile.write(str(power.data))
-        #flagFile.close()
-        #status, output = commands.getstatusoutput('sudo shutdown -h now')
+    if power.data < powerLow and power.data > 8.0: #and not os.path.isfile(powerFlagFilePath)
+        # flagFile = open(powerFlagFilePath, "w+")
+        # flagFile.write(str(power.data))
+        # flagFile.close()
+        powerlow_nums+=1
+        if powerlow_nums>100:
+            status, output = commands.getstatusoutput('sudo shutdown -h now')
+    if powerlow_nums>1 :
+        powerlow_nums-=1
     mStatusLock.release()
 
 def getOdom(odom):
